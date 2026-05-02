@@ -1,4 +1,4 @@
-import { useState, useReducer, useEffect } from "react";
+import { useState, useReducer, useEffect, useRef } from "react";
 
 const I={Sun:p=><svg {...p} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
 Moon:p=><svg {...p} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
@@ -236,13 +236,13 @@ const CSS=`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wg
 @keyframes backdropIn{from{opacity:0}to{opacity:1}}
 @media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}.ctr{padding:16px}}
 @media(max-width:600px){
-  .g2,.g3,.g4{grid-template-columns:1fr}
+  .g2,.g3{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}
   .fr,.fr3{grid-template-columns:1fr}
   .hdr{padding:8px 12px}
   .hdr-acts{width:100%;justify-content:space-between}
   .msw{flex:1}
   .msw-b{flex:1;justify-content:center;font-size:10px;padding:5px 6px}
-  .tabs{display:none!important}
+  .nav-tabs{display:none!important}
   .hdr-menu-btn{display:flex!important}
   .pnav-l{font-size:13px;min-width:100px}
   .kb-col{min-width:200px}
@@ -267,8 +267,14 @@ const CSS=`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wg
   .ag-item{flex-wrap:wrap;gap:8px}
   .kb-wrap{min-height:300px}
   .hdr-brand span:last-child{display:none}
+  .hdr-txt{display:none}
+  .cal-d{min-height:44px}
+  .st-v{font-size:16px}
+  .g4 .st-v{font-size:15px}
+  .day-sum .mono{font-size:13px!important}
+  .day-sum>div{min-width:0}
   .nav-drawer-backdrop{display:block;position:fixed;inset:0;background:var(--bg-modal);z-index:38;animation:backdropIn .18s ease-out}
-  .nav-drawer{display:flex;flex-direction:column;position:fixed;top:var(--hdr-h,52px);right:0;width:220px;background:var(--bg-1);border-left:1px solid var(--brd);border-bottom:1px solid var(--brd);border-radius:0 0 0 14px;z-index:39;padding:8px;gap:2px;box-shadow:-4px 6px 24px rgba(0,0,0,.18);animation:drawerIn .2s ease-out}
+  .nav-drawer{display:flex;flex-direction:column;position:fixed;top:var(--hdr-h,80px);right:0;width:220px;background:var(--bg-1);border-left:1px solid var(--brd);border-bottom:1px solid var(--brd);border-radius:0 0 0 14px;z-index:39;padding:8px;gap:2px;box-shadow:-4px 6px 24px rgba(0,0,0,.18);animation:drawerIn .2s ease-out}
   .nav-drawer-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;border:none;background:transparent;color:var(--c2);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;text-align:left;width:100%;transition:background .12s,color .12s}
   .nav-drawer-item:hover{background:var(--bg-2);color:var(--c1)}
   .nav-drawer-item.active{background:var(--accL);color:var(--acc);font-weight:600}
@@ -277,6 +283,7 @@ const CSS=`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wg
 }
 @media(max-width:380px){
   .cc-wrap{grid-template-columns:1fr}
+  .g4{grid-template-columns:1fr}
   .tab{font-size:9px;padding:4px 2px}
   .msw-b span:last-child{display:none}
 }
@@ -910,7 +917,7 @@ function DayDetailModal({day,year,month,data,dp,onClose}){
       <div style={{fontSize:12,color:"var(--c2)",marginBottom:12}}>Editando: <strong>{editTx.description}</strong></div>
       <TxForm initial={editTx} data={data} dp={dp} onCancel={()=>setEditTx(null)} onSave={()=>setEditTx(null)}/>
     </>:<>
-      <div style={{display:"flex",gap:10,marginBottom:16}}>
+      <div className="day-sum" style={{display:"flex",gap:10,marginBottom:16}}>
         <div style={{flex:1,padding:"10px 12px",background:"var(--incBg)",borderRadius:8,borderLeft:"3px solid var(--inc)"}}><div style={{fontSize:10,color:"var(--inc)",fontWeight:600,textTransform:"uppercase",letterSpacing:.5,marginBottom:2}}>Entradas</div><div className="mono" style={{fontSize:16,fontWeight:700,color:"var(--inc)"}}>{fmt(income)}</div></div>
         <div style={{flex:1,padding:"10px 12px",background:"var(--expBg)",borderRadius:8,borderLeft:"3px solid var(--exp)"}}><div style={{fontSize:10,color:"var(--exp)",fontWeight:600,textTransform:"uppercase",letterSpacing:.5,marginBottom:2}}>Saídas</div><div className="mono" style={{fontSize:16,fontWeight:700,color:"var(--exp)"}}>{fmt(expense)}</div></div>
         <div style={{flex:1,padding:"10px 12px",background:"var(--bg-2)",borderRadius:8,borderLeft:`3px solid ${bal>=0?"var(--inc)":"var(--exp)"}`}}><div style={{fontSize:10,color:"var(--c3)",fontWeight:600,textTransform:"uppercase",letterSpacing:.5,marginBottom:2}}>Saldo do dia</div><div className="mono" style={{fontSize:16,fontWeight:700,color:bal>=0?"var(--inc)":"var(--exp)"}}>{fmt(bal)}</div></div>
@@ -1693,6 +1700,8 @@ export default function App(){
     return genData();
   });
   useEffect(()=>{try{localStorage.setItem("fp_data",JSON.stringify(data));}catch{}},[data]);
+  const hdrRef=useRef();
+  useEffect(()=>{const u=()=>{if(hdrRef.current)document.documentElement.style.setProperty('--hdr-h',hdrRef.current.offsetHeight+'px')};u();window.addEventListener('resize',u);return()=>window.removeEventListener('resize',u)},[]);
   const rs=Object.entries(themes[theme]).reduce((a,[k,v])=>({...a,[k]:v}),{});
 
   const personalTabs=[{id:"dashboard",l:"Dashboard",ic:<I.Zap style={{width:15,height:15}}/>},{id:"calendar",l:"Calendário",ic:<I.Cal style={{width:15,height:15}}/>},{id:"cards",l:"Cartões",ic:<I.CreditCard style={{width:15,height:15}}/>},{id:"performance",l:"Performance",ic:<I.TrendingUp style={{width:15,height:15}}/>},{id:"tags",l:"Tags",ic:<I.Tag style={{width:15,height:15}}/>}];
@@ -1706,7 +1715,7 @@ export default function App(){
   };
 
   return <div className="app" style={rs}><style>{CSS}</style>
-    <header className="hdr" style={{position:"relative"}}>
+    <header className="hdr" ref={hdrRef} style={{position:"relative"}}>
       <div className="hdr-brand"><span className="hdr-dot"/>Fluxo<span style={{fontWeight:400,color:"var(--c3)",fontSize:12}}>financeiro</span></div>
       <div className="hdr-acts">
         <div className="msw">
@@ -1714,9 +1723,9 @@ export default function App(){
           <button className={`msw-b ${mode==="business"?"onb":""}`} onClick={()=>{setMode("business");setDrawerOpen(false)}}><I.Briefcase style={{width:12,height:12}}/> Empresarial</button>
         </div>
         {/* Desktop tabs — hidden on mobile via CSS */}
-        <nav className="tabs">{curTabs.map(t=><button key={t.id} className={`tab ${curTab===t.id?"on":""}`} onClick={()=>navigate(t.id)}>{t.l}</button>)}</nav>
+        <nav className="tabs nav-tabs">{curTabs.map(t=><button key={t.id} className={`tab ${curTab===t.id?"on":""}`} onClick={()=>navigate(t.id)}>{t.l}</button>)}</nav>
         <button className="btn btn-i btn-g" onClick={()=>setTheme(theme==="dark"?"light":"dark")}>{theme==="dark"?<I.Sun/>:<I.Moon/>}</button>
-        <button className="btn btn-s" style={{color:"var(--exp)",borderColor:"var(--exp)",background:"var(--expBg)",flexShrink:0}} onClick={()=>setShowReset(true)}><I.Trash style={{width:12,height:12}}/> Limpar</button>
+        <button className="btn btn-s" style={{color:"var(--exp)",borderColor:"var(--exp)",background:"var(--expBg)",flexShrink:0}} onClick={()=>setShowReset(true)}><I.Trash style={{width:12,height:12}}/><span className="hdr-txt"> Limpar</span></button>
         {/* Hamburger — only visible on mobile via CSS */}
         <button className="btn btn-i btn-g hdr-menu-btn" style={{display:"none",flexShrink:0}} onClick={()=>setDrawerOpen(p=>!p)}>
           {drawerOpen?<I.X/>:<I.Menu/>}
